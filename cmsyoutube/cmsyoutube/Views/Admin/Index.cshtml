@@ -1,0 +1,130 @@
+﻿@{
+    ViewBag.Title = "Thêm mới Video Youtube";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <div class="form-horizontal">
+            @using (Html.BeginForm("getLink", "Admin", FormMethod.Post, htmlAttributes: new { id = "getlink" }))
+            {
+                <div class="form-group">
+                    <input type="hidden" name="cat_video_id" value="0" id="cat_video_id" />
+                    <div class="input-group">
+                        <span class="input-group-addon">Nhập tên danh mục</span>
+                        <input type="text" placeholder="Nhập danh mục mới hoặc chọn danh mục trong danh sách" id="cat_video" class="form-control" name="cat_video" onkeyup="getdanhmuc();" autocomplete="off" />
+                    </div><!-- /input-group -->
+                </div>
+                
+                <div class="form-group">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="linktube" name="linktube" placeholder="Insert URL Youtube">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="btn_getlink" onclick="getLink(event);">Thêm Video</button>
+                        </span>
+                    </div><!-- /input-group -->
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<h3>Kết quả</h3>
+<div id="result" style="font-size: 11px;">
+    <h3>link:</h3>
+    <div id="link"></div>
+    <h3>name:</h3>
+    <div id="name"></div>
+    <h3>View:</h3>
+    <div id="view"></div>
+    <h3>des:</h3>
+    <div id="des"></div>
+    <h3>tags:</h3>
+    <div id="tags"></div>
+    <h3>date:</h3>
+    <div id="date"></div>
+    <h3>img:</h3>
+    <div id="img" style="width: 500px;"></div>
+    <h4>video:</h4>
+    <div id="video"></div>
+</div>
+
+
+
+@section scripts {
+
+    <script>
+
+        function getLink(e) {
+            if (document.getElementById("cat_video").value === "") {
+                // Display a warning toast, with no title
+                toastr.warning('Vui lòng nhập danh mục video!')
+                document.getElementById("cat_video").focus();
+                return false;
+            }
+            if (document.getElementById("linktube").value === "") {
+                toastr.warning('Vui lòng nhập đường link video!')
+                document.getElementById("linktube").focus();
+                return false;
+            }
+            var url = '/Admin/getLink';
+            // Send the data using post
+            var send = $.post(url, { id: document.getElementById("cat_video_id").value, catvideo: document.getElementById("cat_video").value, linktube: document.getElementById("linktube").value });
+
+            // Put the results in a div
+            send.done(function (data) {
+                if (data) {
+                    toastr.success('Thêm video thành công!', 'Thông báo')
+                    var myImg = data.img;
+                    $("#img").empty().append('<img class="img-responsive" src="' + myImg + '" />');
+                    var myVideo = '<iframe class="embed-responsive-item" src="//www.youtube.com/embed/'
+                    + data.code + '?autoplay=1" frameborder="0" allowfullscreen></iframe>';
+                    $('#video').empty().append(myVideo);
+                    $('#link').empty().append(data.link);
+                    $('#name').empty().append(data.name);
+                    $('#des').empty().append(data.des);
+                    $('#tags').empty().append(data.tags);
+                    $('#date').empty().append(data.date);
+                    $('#view').empty().append(data.view);
+                }
+            });
+
+            send.error(function (err) {
+                console.log(err);
+            })
+
+            //$.ajax({
+            //    url: '/home/getLink',
+            //    type: 'POST',
+            //    cache: false,
+            //    dataType: 'json',
+            //    data: { linktube: document.getElementById("linktube").value },
+            //    success: function (data) {
+            //        console.log(data);
+            //    }
+            //});
+            e.preventDefault();
+        }
+
+        function getdanhmuc() {
+            var keyword = document.getElementById("cat_video").value;
+            if (keyword == "") {
+                $("#cat_video_id").val(0);
+            }
+            var urlSearch = '/Admin/getcatvideo?keyword=';
+            $('#cat_video').autocomplete({
+                source: urlSearch + keyword,
+                select: function (event, ui) {
+                    $("#cat_video").val(ui.item.label);
+                    $("#cat_video_id").val(ui.item.value);
+                    return false;
+                },
+                minLength: 1,
+            });
+        }
+
+    </script>
+
+}

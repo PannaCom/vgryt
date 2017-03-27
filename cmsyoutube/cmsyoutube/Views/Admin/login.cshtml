@@ -1,0 +1,74 @@
+﻿@{
+    ViewBag.Title = "Đăng nhập";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-md-offset-3 col-md-6">
+        <div class="form-horizontal">
+            @using (Html.BeginForm("Login", "Admin", FormMethod.Post, htmlAttributes: new { id = "form-login" }))
+            {
+                @Html.AntiForgeryToken();
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Tài khoản:</span>
+                        <input type="text" class="form-control" id="root" name="root" placeholder="Nhập tên đăng nhập">
+                    </div><!-- /input-group -->
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Mật khẩu:</span>
+                        <input type="password" class="form-control" id="pass" name="pass" placeholder="Nhập mật khẩu">
+                    </div><!-- /input-group -->
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <button type="button" class="btn btn-primary" id="loginbtn" onclick="login(event);">Đăng nhập</button>
+                    </div>
+                </div>
+
+                
+            }
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+    <script>
+        function login(e) {
+            e.preventDefault();
+            if (document.getElementById("root").value === "") {
+                // Display a warning toast, with no title
+                toastr.warning('Vui lòng nhập tên đăng nhập!')
+                document.getElementById("root").focus();
+                return false;
+            }
+            if (document.getElementById("pass").value === "") {
+                toastr.warning('Vui lòng nhập mật khẩu!')
+                document.getElementById("pass").focus();
+                return false;
+            }
+            var url = '/Admin/Login';
+            // Send the data using post
+            var send = $.post(url, { root: document.getElementById("root").value, pass: document.getElementById("pass").value });
+
+            // Put the results in a div
+            send.done(function (data) {
+                if (data == 1) {
+                    return location.href = "/admin";
+                } else {
+                    toastr.warning('Tài khoản hoặc mật khẩu không đúng!')
+                    return false;
+                }
+            });
+
+            send.error(function (err) {
+                console.log(err);
+            })
+        }
+    </script>
+}

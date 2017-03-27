@@ -1,0 +1,126 @@
+﻿@model PagedList.IPagedList<cmsyoutube.Models.video>
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "cms Youtu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    string url = Request.Url.Authority + HttpContext.Current.Request.RawUrl.ToString();
+    string host = Request.Url.Authority;
+    if (Request.ServerVariables["HTTPS"] == "on")
+    {
+        url = "https://" + url;
+        host = "https://" + host;
+    }
+    else
+    {
+        url = "http://" + url;
+        host = "http://" + host;
+    }
+}
+
+@{
+    ViewBag.url = url;
+    ViewBag.des = "a cms youtube get data info chanel";
+    ViewBag.keys = "cms youtu, cms youtube dot net, cms youtube, cms .net youtube, get data info youtube video";
+    
+}
+
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <div class="form-horizontal">
+            <form action="/home/index" method="get" id="searchVideo" enctype="multipart/form-data">
+                <div class="form-group">
+                    <select name="catid" id="catid" class="form-control">
+                        <option value="">Chọn danh mục</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search" name="search" placeholder="Nhập từ khóa tìm kiếm">
+                        <span class="input-group-btn">
+                            <input class="btn btn-default" type="submit" id="btn_search" value="Tìm kiếm video" />
+                        </span>
+                    </div><!-- /input-group -->
+                </div>
+            </form>
+
+            <script>
+                setTimeout(function () {
+                    document.getElementById("catid").value = '@ViewBag.catid';
+                    document.getElementById("search").value = '@Html.Raw(@ViewBag.search)';
+                }, 1000)
+            </script>
+            
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+
+        @if (Model != null)
+        {
+            <div class="container">
+                <div>
+                    <h5>Chọn Video dưới danh sách để xem:</h5>
+                    <div id="video_view" class="text-center">
+
+                    </div>
+                    <hr>
+                </div>
+                <ul class="list-unstyled video-list-thumbs row">
+                    @foreach (var item in Model)
+                    {
+                        <li class="col-lg-3 col-md-4 col-sm-4 col-xs-6">
+                            <a href="#" title="@item.name" data-video="@item.code" data-id="@item.id" class="item_video">
+                                <img src="@item.img" alt="" class="img-responsive" style="height: 130px; width: 100%;"/>
+                                <h2>
+                                    @if (item.name.Length > 50)
+                                    {
+                                        @item.name.Substring(0, 50)
+                                    }
+                                    else
+                                    {
+                                        @item.name
+                                    }
+                                </h2>
+                                <span class="glyphicon glyphicon-play-circle"></span>
+                                <span class="duration">@string.Format("{0:dd/MM/yyyy HH:mm:ss tt}", item.create_date)</span>
+                            </a>
+                        </li>
+                    }
+                    
+                </ul>
+
+                @if (Model != null)
+                {
+                    @Html.PagedListPager(Model, page => Url.Action("Index", new { pg = page, search = ViewBag.search, catid = ViewBag.catid }), PagedListRenderOptions.OnlyShowFivePagesAtATime)
+                }
+            </div>
+        }
+
+    </div>
+</div>
+
+
+@section scripts {
+    <script>
+
+        //Loaixe_socho
+            $.ajax({
+                url: "/Home/getdanhmuc",
+                cache: false
+            }).done(function (html) {
+                $('#catid').append(html);
+            });
+            
+           
+
+</script>
+    
+    }
